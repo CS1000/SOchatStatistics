@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Room <?=$room?> Statistics</title>
+    <title><?=$roomname?> - Room Statistics</title>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
       google.load("visualization", "1", {packages:["corechart"]});
@@ -13,7 +13,7 @@
         ]);
   
         var options = {
-          title: 'Ocurence of word "<?=$word?>" in room <?=$room?>'
+          title: 'Ocurence of word "<?=$word?>" in "<?=$roomname?>" room'
         };
   
         var chart = new google.visualization.PieChart(document.getElementById('piechart'));

@@ -9,6 +9,11 @@
 
   $data=file('http://chat.stackoverflow.com/search?q='.urlencode($word).'&Room='.$room.'&page=1&pagesize=100&sort=newest');
   
+  $roomname=preg_grep('~class="searchroom~i', $data);
+  $roomname=each($roomname);
+  preg_match('~href=[^>]+>(.+?)</a>~i', $roomname[1], $matches);
+  $roomname=$matches[1];
+
   $users=preg_grep('~<div class="username"><a href="/users/~', $data);
   
   $count=array();
@@ -33,7 +38,7 @@
         $other+=$num;
       }
   }
-  $list="['Who', 'times']".$list.",['Others', $other]";
+  $list="['Who', 'times']\n".$list.",['Others', $other]\n";
 
   //debug:
   //echo $list;
