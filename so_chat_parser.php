@@ -60,6 +60,7 @@
       }
   }
   $list="['Who', 'times']\n".$list.",['Others', $other]\n";
+  $allTimePercent=round($shownMessages*100/$messageNumber, 1);
 
   //debug:
   //echo $list;

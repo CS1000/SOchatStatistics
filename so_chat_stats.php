@@ -45,8 +45,8 @@
       <?php 
         echo 'Period range: ',$range,'<br>'; 
         echo '<p>Showing statistics with ';
-        $prc=round($shownMessages*100/$messageNumber, 1);
-        if ((int)$prc==100) echo '<b>all time data</b> ';
+        
+        if ($allTimePercent==100) echo '<b>all time data</b> ';
         else echo '<b>recent data</b> (',$prc,'% of all time) ';
         echo 'where searchphrase "',$word,'" occured.</p>';
       ?>
