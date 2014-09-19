@@ -44,12 +44,16 @@
     <div id="notices">
       <?php 
         $shownMessages=count($users);
-        echo 'Period range: ',$start,' to ',$end,'<br>'; 
+        echo 'Period range: ';
+        if ($start!='') echo $start,' to ';
+        else echo '(one day) ';
+        echo $end,'<br>'; 
+        
         echo '<p>Showing statistics with ';
         $prc=round($shownMessages*100/$messageNumber, 1);
         if ((int)$prc==100) echo '<b>all time data</b> ';
-        else echo '<b>recent data</b> ('.$prc.'% of all time) ';
-        echo 'where word "'.$word.'" occured.</p>';
+        else echo '<b>recent data</b> (',$prc,'% of all time) ';
+        echo 'where word "',$word,'" occured.</p>';
       ?>
       <p class="notice">* users with word count less than 2 are not shown in the list, 
         and counted totards "Others" group.</p>
