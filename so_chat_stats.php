@@ -48,10 +48,10 @@
         if ($start!='') echo $start,' to ';
         else echo '(one day) ';
         echo $end,'<br>'; 
-        
+
         echo '<p>Showing statistics with ';
         $prc=round($shownMessages*100/$messageNumber, 1);
-        if ((int)$prc==100) echo '<b>all time data</b> ';
+        if ((int)$prc==100 or $start=='') echo '<b>all time data</b> ';
         else echo '<b>recent data</b> (',$prc,'% of all time) ';
         echo 'where word "',$word,'" occured.</p>';
       ?>
