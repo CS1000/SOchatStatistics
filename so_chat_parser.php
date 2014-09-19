@@ -9,6 +9,14 @@
 
   $data=file('http://chat.stackoverflow.com/search?q='.urlencode($word).'&Room='.$room.'&page=1&pagesize=100&sort=newest');
   
+  $start=preg_grep('~<div class="timestamp">~i', $data);
+  $end=array_pop($start);
+  $start=array_shift($start);
+
+  $messageNumber=preg_grep('~<p>([0-9]+) messages found</p>~i', $data);
+  preg_match('~>([0-9]+)~', array_pop($messageNumber), $allTimeMsg);
+  $messageNumber=$allTimeMsg[1];
+
   $roomname=preg_grep('~class="searchroom~i', $data);
   $roomname=each($roomname);
   preg_match('~href=[^>]+>(.+?)</a>~i', $roomname[1], $matches);
