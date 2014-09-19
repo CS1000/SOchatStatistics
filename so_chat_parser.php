@@ -10,12 +10,23 @@
   $data=file('http://chat.stackoverflow.com/search?q='.urlencode($word).'&Room='.$room.'&page=1&pagesize=100&sort=newest');
   
   $start=preg_grep('~<div class="timestamp">~i', $data);
-  $end=array_pop($start);
-  $start=array_shift($start);
+  $end=trim(strip_tags(array_shift($start)));
+  if (count($start)<1) $start=$end;
+  else $start=trim(strip_tags(array_pop($start)));
+  $start=str_replace("'", '20', $start);
+  $end=str_replace("'", '20', $end);
+  $start=new DateTime($start);
+  $end=new DateTime($end);
+  $interval=$start->diff($end);
+  $interval=$interval->days;
+  $range=$interval.'days, ';
+  if ($interval>0) $range.='from '.$start->format("d M Y").' to '.$end->format("d M Y");
+  else $range.=$start->format("d M Y");
 
-  $messageNumber=preg_grep('~<p>([0-9]+) messages found</p>~i', $data);
+
+  $messageNumber=preg_grep('~<p>([0-9]+) messages? found</p>~i', $data);
   preg_match('~>([0-9]+)~', array_pop($messageNumber), $allTimeMsg);
-  $messageNumber=$allTimeMsg[1];
+  $messageNumber=(int)$allTimeMsg[1];
 
   $roomname=preg_grep('~class="searchroom~i', $data);
   $roomname=each($roomname);
@@ -23,13 +34,15 @@
   $roomname=$matches[1];
 
   $users=preg_grep('~<div class="username"><a href="/users/~', $data);
-  
+
   $count=array();
   $names=array();
+  $shownMessages=0;
   foreach ($users as $user) { 
       preg_match('~/users/(\d+)/[^>]+>([^<]+)~', $user, $m);
       $names[$m[1]]=$m[2];
       @$count[$m[1]]++;
+      $shownMessages++;
   }
   arsort($count);
   $list='';
