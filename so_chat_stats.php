@@ -47,7 +47,7 @@
         echo '<p>Showing statistics with ';
         
         if ($allTimePercent==100) echo '<b>all time data</b> ';
-        else echo '<b>recent data</b> (',$prc,'% of all time) ';
+        else echo '<b>recent data</b> (',$allTimePercent,'% of all time) ';
         echo 'where searchphrase "',$word,'" occured.</p>';
       ?>
       <p class="notice">* users with word count less than 2 are not shown in the list, 
