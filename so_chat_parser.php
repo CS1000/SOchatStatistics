@@ -1,6 +1,6 @@
 <?php
-  
-    $minimumRepeat=2;
+    
+    $minimumRepeat=2; //importance treshold, overridden by dynamic adjust
 
     isset($_GET['where']) && $room=$_GET['where'];
 
@@ -56,8 +56,8 @@
     $shownMessages=0;
     foreach ($users as $user) { 
         preg_match('~/users/(\d+)/[^>]+>([^<]+)~', $user, $m);
-        $names[$m[1]]=$m[2];
-        @$count[$m[1]]++;
+        isset($names[$m[1]]) || $names[$m[1]]=$m[2];
+        @$count[$m[1]]++; //fu
         $shownMessages++;
     }
     arsort($count);
@@ -65,11 +65,11 @@
     $list='';
     $other=0; //counts messages
     $totalUsersShown=count($names);
-    if ($totalUsersShown<=12) $minimumRepeat=1; //dynamic userlist adjustment
+    if ($totalUsersShown<=13) $minimumRepeat=1; //dynamic userlist adjustment
     $topUsers=0; 
     $otherUsers=0; //counts users
     foreach ($count as $id=>$num) {
-        if ($topUsers==11) { //dynamic userlist adjustment
+        if ($topUsers==12) { //dynamic userlist adjustment
             if ($minimumRepeat<$num) {
                 $minimumRepeat=$num; 
             }
