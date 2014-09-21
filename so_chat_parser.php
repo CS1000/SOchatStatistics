@@ -55,7 +55,7 @@
     $names=array(); // =[] //php5.4+
     $shownMessages=0;
     foreach ($users as $user) { 
-        preg_match('~/users/(\d+)/[^>]+>([^<]+)~', $user, $m);
+        preg_match('~/users/(-?\d+)/[^>]+>([^<]+)~', $user, $m);
         isset($names[$m[1]]) || $names[$m[1]]=$m[2];
         @$count[$m[1]]++; //fu
         $shownMessages++;
@@ -75,7 +75,9 @@
             }
         }
         if ($num>=$minimumRepeat) { 
-            $list.=",['".$names[$id]."', ".$num."]";
+            $name=$names[$id];
+            //if ($id==-2) // FEEDS
+            $list.=",['".$name."', ".$num."]";
             $topUsers++;
         } else {
             $other+=$num; //add messages
