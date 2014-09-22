@@ -18,7 +18,7 @@
                       indexLabelFontFamily: "Open Sans",
                       //indexLabelPlacement: "inside",
                       indexLabel: "{label} {percent}%", 
-                      toolTipContent: "{place} <b>{label}</b><br> said &quot;<i><?=$word?></i>&quot; {y} times",
+                      toolTipContent: "{place} <b>{label}</b><br> said it {y} times",
                       type: "doughnut",
                       dataPoints: <?=$list?>
                   }]

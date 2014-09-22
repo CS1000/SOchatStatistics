@@ -65,7 +65,7 @@
         $format="l ( F jS Y";
         $rangeDetailed=$start->format($format).' )';
     } elseif ($interval->days>92) {
-        $range=$interval->m.' months';
+        $range=round($interval->days/30.2, 1).' months';
     } else {
         $range=$interval->days.' days';
     }
