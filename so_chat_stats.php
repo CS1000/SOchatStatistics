@@ -3,11 +3,33 @@
   <head>
     <meta charset="UTF-8">
     <title><?=$roomname?> - Room Statistics</title>
-    <link rel="stylesheet" href="default.css">
+    <link rel="stylesheet" href="incload/style.css">
+    <script type="text/javascript">
+      window.onload = function () {
+        userchart = new CanvasJS.Chart("user_chart", {
+          legend: {
+            verticalAlign: "bottom",
+            horizontalAlign: "center"
+          },
+          data: [{
+            startAngle: 210,
+            indexLabelFontSize: 12,
+            indexLabelFontFamily: "Open Sans",
+            //indexLabelPlacement: "inside",
+            indexLabel: "{label} {percent}%", 
+            toolTipContent: "{place} <b>{label}</b><br> said &quot;<i><?=$word?></i>&quot; {y} times",
+            type: "doughnut",
+            dataPoints: <?=$list?>
+          }]
+        });
+        userchart.render();
+      }
+    </script>
+    <script type="text/javascript" src="incload/canvasjs.min.js"></script>
   </head>
-  <body>
+<body>
     <div id="wrapper" class="clear">
-      <section id="piechart"></section>
+      <section id="user_chart"></section>
       <section>
          <h1>Occurrence of "<span class="highlight"><?=$word?></span>" in "<span class="highlight"><?=$roomname?></span>" room</h1>
          <div id="notices">
@@ -25,21 +47,6 @@
         </div>
       </section>
     </div>
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <script type="text/javascript">
-      google.load("visualization", "1", {packages:["corechart"]});
-      google.setOnLoadCallback(drawChart);
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable([<?=$list?>]);
-  
-        var options = {
-          title: 'StackOverflow Chat Statistics'
-        };
-  
-        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
-        chart.draw(data, options);
-      }
-    </script>
   </body>
 </html>
  

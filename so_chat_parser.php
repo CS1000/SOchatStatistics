@@ -8,7 +8,7 @@
 
     isset($_GET['word']) && $word=$_GET['word'];
 
-    $word=preg_replace('/[^?\pL^$ \pN.#:;_!><-]/i', '', $word);
+    $word=preg_replace('/[^$\pL \pN_.:;!?#^-]/i', '', $word);
     ''!=$word or die('404 word does not exist!');
     
     $requestURL='http://chat.stackoverflow.com/search?q=';
@@ -28,7 +28,9 @@
     } catch (Exception $e) { 
         $rangeDetailed='Too many requests!';
         $statisticsDetails='DATA ERROR: please come back later, later!';
-        $list="['What','code'], ['Error','408']";
+        $list=[];
+        $list[]=['y'=>403, 'label'=>"Error"];
+        $list[]=['y'=>501, 'label'=>"Error"];
         goto theEndOfTheRoad; //don't worry, carry on        
     }
 
@@ -76,27 +78,41 @@
     }
     arsort($count);
 
-    $list='';
+    $list=[];
     $other=0; //counts messages
     $totalUsersShown=count($names);
-    if ($totalUsersShown<=13) $minimumRepeat=1; //dynamic userlist adjustment
+    if ($totalUsersShown<=12) $minimumRepeat=1; //dynamic userlist adjustment
     $topUsers=0; 
     $otherUsers=0; //counts users
-    foreach ($count as $id=>$num) {
-        if ($topUsers==12) { //dynamic userlist adjustment
+    foreach ($count as $id=>$num):
+        if ($topUsers==10) { //dynamic userlist adjustment
             if ($minimumRepeat<$num) $minimumRepeat=$num; 
         }
         if ($num>=$minimumRepeat) { 
+            $topUsers++;
             $name=$names[$id];
             //if ($id==-2) // FEEDS
-            $list.=",['".$name."', ".$num."]";
-            $topUsers++;
+            $tlist=[];
+            $tlist['y']=$num;
+            $tlist['label']="$name";
+            $tlist["place"]="#$topUsers";
+            $percent=round($num*100/$shownMessages, 1);
+            $tlist["percent"]=$percent;
+            $uniqNameColor=substr(hash('md4', $id),1 ,6); //color algo #1
+            $tlist["color"]='#'.$uniqNameColor;
+            //$tlist["indexLabelFontColor"]='#'.substr(preg_replace('/[^0-9a-f]/', '', $name.$id), 0 ,6); //color algo #2
+            $font=round(16/strlen($name)*$percent);
+            if ($font<12) $font=12;
+            elseif ($font>24) $font=24;
+            $tlist['indexLabelFontSize']=$font;
+            if ($topUsers==1) $tlist['exploded']='true';
+            $list[]=$tlist;
         } else {
             $other+=$num; //add messages
             $otherUsers++; //add users
         }
-    }
-    $list="['Who', 'times']".$list.",['Others', $other]";
+    endforeach;
+    if ($other) $list[]=['y'=>$other, 'label'=>"Others", "percent"=>round($other*100/$shownMessages, 1)];
 
     $allTimePercent=round($shownMessages*100/$messageNumber, 1);
     if ($allTimePercent==100) $statisticsDetails='<b>All time data</b>';
@@ -114,5 +130,5 @@
         $footerNotice.='<b>are not shown in the list</b>, and counted towards "Others" group for readability.';
     }
 
-theEndOfTheRoad:;
- 
+theEndOfTheRoad:
+$list=json_encode($list); 
