@@ -3,24 +3,40 @@
     $minimumRepeat=2; //importance treshold, overridden by dynamic adjust
 
     isset($_GET['where']) && $room=$_GET['where'];
-
-    if ($room===preg_replace('/[^0-9]/', '#', $room)) $room='&Room='.$room;
-    else $room='';
+    $room=preg_replace('/[^0-9]/', '', $room);
+    $room===$_GET['where'] or die('404 does not exist!');
 
     isset($_GET['word']) && $word=$_GET['word'];
 
     $word=preg_replace('/[^?\pL^$ \pN.#:;_!><-]/i', '', $word);
     ''!=$word or die('404 word does not exist!');
-    $data=file('http://chat.stackoverflow.com/search?q='.urlencode($word).$room.'&page=1&pagesize=100&sort=newest');
+    
+    $requestURL='http://chat.stackoverflow.com/search?q=';
+    $requestURL.=urlencode($word);
+    if ($room != '') {
+        $requestURL.='&Room='.$room;
+        $room.='/'; //used in redirect
+    }
+    $requestURL.='&page=1&pagesize=100&sort=newest';
+    
+    try {
+        $data=file($requestURL);
+        if (count($data)<30) {
+            header('Location: http://chat.stackoverflow.com/rooms/'.$room);
+            die();
+        }
+    } catch (Exception $e) { 
+        $rangeDetailed='Too many requests!';
+        $statisticsDetails='DATA ERROR: please come back later, later!';
+        $list="['What','code'], ['Error','408']";
+        goto theEndOfTheRoad; //don't worry, carry on        
+    }
 
     $start=preg_grep('~<div class="timestamp">~i', $data);
     $end=trim(strip_tags(array_shift($start)));
-    if (count($start)<1) $start=$end;
-    else $start=trim(strip_tags(array_pop($start)));
-    $start=str_replace("'", '20', $start);
-    $end=str_replace("'", '20', $end);
-    $start=new DateTime($start);
-    $end=new DateTime($end);
+    count($start)<1 ? $start=$end : $start=trim(strip_tags(array_pop($start)));
+    $start=new DateTime(str_replace("'", '20', $start));
+    $end=new DateTime(str_replace("'", '20', $end));
     $interval=$start->diff($end);
 
     $range=$interval->days.' days'; //failsafe
@@ -37,22 +53,20 @@
     endInterval:;
 
     $messageNumber=preg_grep('~<p>([0-9]+) messages? found</p>~i', $data);
-    preg_match('~>([0-9]+)~', array_pop($messageNumber), $allTimeMsg);
+    preg_match('~>([0-9]+)~', current($messageNumber), $allTimeMsg);
     $messageNumber=(int)$allTimeMsg[1];
 
-    if ($room=='') {
-        $roomname='All Rooms';
-    } else {
-        $roomname=preg_grep('~class="searchroom~i', $data);
-        $roomname=each($roomname);
-        preg_match('~href=[^>]+>(.+?)</a>~i', $roomname[1], $matches);
+    $roomname='All Rooms';
+    if ($room!='') {
+        $roomname=current(preg_grep('~class="searchroom~i', $data));
+        preg_match('~href=[^>]+>(.+?)</a>~i', $roomname, $matches);
         $roomname=$matches[1];
     }
 
     $users=preg_grep('~<div class="username"><a href="/users/~', $data);
 
-    $count=array(); // =[] //php5.4+
-    $names=array(); // =[] //php5.4+
+    $count=array(); // [] //php5.4+
+    $names=array();
     $shownMessages=0;
     foreach ($users as $user) { 
         preg_match('~/users/(-?\d+)/[^>]+>([^<]+)~', $user, $m);
@@ -70,9 +84,7 @@
     $otherUsers=0; //counts users
     foreach ($count as $id=>$num) {
         if ($topUsers==12) { //dynamic userlist adjustment
-            if ($minimumRepeat<$num) {
-                $minimumRepeat=$num; 
-            }
+            if ($minimumRepeat<$num) $minimumRepeat=$num; 
         }
         if ($num>=$minimumRepeat) { 
             $name=$names[$id];
@@ -85,14 +97,15 @@
         }
     }
     $list="['Who', 'times']".$list.",['Others', $other]";
+
     $allTimePercent=round($shownMessages*100/$messageNumber, 1);
-    if ($allTimePercent==100) { 
-        $statisticsDetails='<b>All time data</b>';
+    if ($allTimePercent==100) $statisticsDetails='<b>All time data</b>';
+    else $statisticsDetails='<b>recent data</b> ('.$allTimePercent.'% of all time)';
+    if ($totalUsersShown>1) {
+        $statisticsDetails.=" showing $totalUsersShown users";
     } else {
-        $statisticsDetails='<b>recent data</b> ('.$allTimePercent.'% of all time)';
+        $statisticsDetails.=" only 1 user";
     }
-    if ($totalUsersShown>1) $statisticsDetails.=" showing $totalUsersShown users";
-    else $statisticsDetails.=" only 1 user";
     if ($otherUsers>0) $statisticsDetails.=" ($topUsers trending and $otherUsers others)";
 
     $footerNotice='';
@@ -101,4 +114,5 @@
         $footerNotice.='<b>are not shown in the list</b>, and counted towards "Others" group for readability.';
     }
 
+theEndOfTheRoad:;
  
