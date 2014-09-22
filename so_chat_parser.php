@@ -8,7 +8,7 @@
 
     isset($_GET['word']) && $word=$_GET['word'];
 
-    $word=preg_replace('/[^$\pL \pN_.:;!?#^-]/i', '', $word);
+    $word=preg_replace('/[^$\pL@ \pN_.:;!?#^-]/i', '', $word);
     ''!=$word or die('404 word does not exist!');
     
     $requestURL='http://chat.stackoverflow.com/search?q=';
@@ -57,6 +57,7 @@
     $messageNumber=preg_grep('~<p>([0-9]+) messages? found</p>~i', $data);
     preg_match('~>([0-9]+)~', current($messageNumber), $allTimeMsg);
     $messageNumber=(int)$allTimeMsg[1];
+    if ($messageNumber<1) goto theEndOfTheRoad;
 
     $roomname='All Rooms';
     if ($room!='') {
