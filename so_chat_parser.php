@@ -18,21 +18,38 @@
         $room.='/'; //used in redirect
     }
     $requestURL.='&page=1&pagesize=100&sort=newest';
-    
+
+    $messageNumber=0;
     try {
         $data=file($requestURL);
         if (count($data)<30) {
-            header('Location: http://chat.stackoverflow.com/rooms/'.$room);
+            header('Location: http://chat.stackoverflow.com/rooms/'.$room); //page has unknown output
             die();
         }
     } catch (Exception $e) { 
-        $rangeDetailed='Too many requests!';
-        $statisticsDetails='DATA ERROR: please come back later, later!';
-        $list=[];
-        $list[]=['y'=>403, 'label'=>"Error"];
-        $list[]=['y'=>501, 'label'=>"Error"];
+        $range='Wait';
+        $rangeDetailed="! Too many requests.";
+        $statisticsDetails="Nope";
         goto theEndOfTheRoad; //don't worry, carry on        
     }
+
+    $roomname='All Rooms';
+    if ($room!='') {
+        $roomname=current(preg_grep('~class="searchroom~i', $data));
+        preg_match('~href=[^>]+>(.+?)</a>~i', $roomname, $matches);
+        $roomname=$matches[1];
+    }
+    
+    $messageNumber=preg_grep('~<p>([0-9]+) messages? found</p>~i', $data);
+    preg_match('~>([0-9]+)~', current($messageNumber), $allTimeMsg);
+    $messageNumber=$allTimeMsg[1]+0;
+    if ($messageNumber<1) {
+        $range='';
+        $rangeDetailed="The begining of time <small><small>clock on chat.stackoverflow server</small></small> &mdash; Today, Current Time";
+        $statisticsDetails="Zero Results";
+        goto theEndOfTheRoad;
+    }
+    
 
     $start=preg_grep('~<div class="timestamp">~i', $data);
     $end=trim(strip_tags(array_shift($start)));
@@ -41,35 +58,22 @@
     $end=new DateTime(str_replace("'", '20', $end));
     $interval=$start->diff($end);
 
-    $range=$interval->days.' days'; //failsafe
-    $format="F jS Y"; //failsafe
+    $format="F jS Y";
+    $rangeDetailed=' ( '.$start->format($format).' &mdash; '.$end->format($format).' )';
     if ($interval->days<=1) {
         $range='1 day: ';
         $format="l ( F jS Y";
         $rangeDetailed=$start->format($format).' )';
-        goto endInterval;
     } elseif ($interval->days>92) {
         $range=$interval->m.' months';
-    } 
-    $rangeDetailed=' ( '.$start->format($format).' &mdash; '.$end->format($format).' )';
-    endInterval:;
-
-    $messageNumber=preg_grep('~<p>([0-9]+) messages? found</p>~i', $data);
-    preg_match('~>([0-9]+)~', current($messageNumber), $allTimeMsg);
-    $messageNumber=(int)$allTimeMsg[1];
-    if ($messageNumber<1) goto theEndOfTheRoad;
-
-    $roomname='All Rooms';
-    if ($room!='') {
-        $roomname=current(preg_grep('~class="searchroom~i', $data));
-        preg_match('~href=[^>]+>(.+?)</a>~i', $roomname, $matches);
-        $roomname=$matches[1];
+    } else {
+        $range=$interval->days.' days';
     }
 
     $users=preg_grep('~<div class="username"><a href="/users/~', $data);
 
-    $count=array(); // [] //php5.4+
-    $names=array();
+    $count=[];
+    $names=[];
     $shownMessages=0;
     foreach ($users as $user) { 
         preg_match('~/users/(-?\d+)/[^>]+>([^<]+)~', $user, $m);
@@ -125,11 +129,12 @@
     }
     if ($otherUsers>0) $statisticsDetails.=" ($topUsers trending and $otherUsers others)";
 
-    $footerNotice='';
     if ($minimumRepeat>1) {
         $footerNotice="* Users reiterating the phrase less than $minimumRepeat times ";
         $footerNotice.='<b>are not shown in the list</b>, and counted towards "Others" group for readability.';
     }
 
+    $list=json_encode($list); 
+
 theEndOfTheRoad:
-$list=json_encode($list); 
+ 

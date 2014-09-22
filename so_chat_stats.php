@@ -4,32 +4,34 @@
     <meta charset="UTF-8">
     <title><?=$roomname?> - Room Statistics</title>
     <link rel="stylesheet" href="incload/style.css">
-    <script type="text/javascript">
-      window.onload = function () {
-        userchart = new CanvasJS.Chart("user_chart", {
-          legend: {
-            verticalAlign: "bottom",
-            horizontalAlign: "center"
-          },
-          data: [{
-            startAngle: 210,
-            indexLabelFontSize: 12,
-            indexLabelFontFamily: "Open Sans",
-            //indexLabelPlacement: "inside",
-            indexLabel: "{label} {percent}%", 
-            toolTipContent: "{place} <b>{label}</b><br> said &quot;<i><?=$word?></i>&quot; {y} times",
-            type: "doughnut",
-            dataPoints: <?=$list?>
-          }]
-        });
-        userchart.render();
-      }
-    </script>
+    <?php if ($messageNumber>1): //phpif?>
+      <script type="text/javascript">
+          window.onload = function () {
+              userchart = new CanvasJS.Chart("user_chart", {
+                  legend: {
+                      verticalAlign: "bottom",
+                      horizontalAlign: "center"
+                  },
+                  data: [{
+                      startAngle: 210,
+                      indexLabelFontSize: 12,
+                      indexLabelFontFamily: "Open Sans",
+                      //indexLabelPlacement: "inside",
+                      indexLabel: "{label} {percent}%", 
+                      toolTipContent: "{place} <b>{label}</b><br> said &quot;<i><?=$word?></i>&quot; {y} times",
+                      type: "doughnut",
+                      dataPoints: <?=$list?>
+                  }]
+              });
+              userchart.render();
+          }
+      </script>
     <script type="text/javascript" src="incload/canvasjs.min.js"></script>
+  <?php endif; //endphp?>
   </head>
 <body>
     <div id="wrapper" class="clear">
-      <section id="user_chart"></section>
+      <section id="user_chart"><?=($messageNumber<1)?'<h1>.</h1>':''?></section>
       <section>
          <h1>Occurrence of "<span class="highlight"><?=$word?></span>" in "<span class="highlight"><?=$roomname?></span>" room</h1>
          <div id="notices">
@@ -43,7 +45,7 @@
               <td><?=$statisticsDetails?></td>
             </tr>
           </table>
-          <p class="notice"><?=$footerNotice?></p>
+          <p class="notice"><?=($messageNumber>1)?$footerNotice:''?></p>
         </div>
       </section>
     </div>
