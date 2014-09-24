@@ -82,6 +82,21 @@
         $shownMessages++;
     }
     arsort($count);
+    $avg=$interval->days/$shownMessages; //days
+    $avgPeriod='days';
+    if ($avg<1) {
+        $avg*=24;
+        $avgPeriod='hours';
+    }
+    if ($avg<1) {
+        $avg*=60;
+        $avgPeriod='minutes';
+    }
+    if ($avg<1) {
+        $avg*=60;
+        $avgPeriod='seconds';
+    }
+    $avg=round($avg);
 
     $list=[];
     $other=0; //counts messages
@@ -110,7 +125,7 @@
             if ($font<12) $font=12;
             elseif ($font>24) $font=24;
             $tlist['indexLabelFontSize']=$font;
-            if ($topUsers==1) $tlist['exploded']='true';
+            if ($topUsers==1 and $totalUsersShown>2) $tlist['exploded']='true';
             $list[]=$tlist;
         } else {
             $other+=$num; //add messages
@@ -129,6 +144,7 @@
     }
     if ($otherUsers>0) $statisticsDetails.=" ($topUsers trending and $otherUsers others)";
 
+    $footerNotice='';
     if ($minimumRepeat>1) {
         $footerNotice="* Users reiterating the phrase less than $minimumRepeat times ";
         $footerNotice.='<b>are not shown in the list</b>, and counted towards "Others" group for readability.';

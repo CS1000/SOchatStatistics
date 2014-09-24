@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title><?=$roomname?> - Room Statistics</title>
     <link rel="stylesheet" href="incload/style.css">
-    <?php if ($messageNumber>1): //phpif?>
+    <?php if ($messageNumber>0): //phpif?>
       <script type="text/javascript">
           window.onload = function () {
               userchart = new CanvasJS.Chart("user_chart", {
@@ -31,7 +31,7 @@
   </head>
 <body>
     <div id="wrapper" class="clear">
-      <section id="user_chart"><?=($messageNumber<1)?'<h1>.</h1>':''?></section>
+      <section id="user_chart"><?=($messageNumber<1)?'<h1>-.-</h1>':''?></section>
       <section>
          <h1>Occurrence of "<span class="highlight"><?=$word?></span>" in "<span class="highlight"><?=$roomname?></span>" room</h1>
          <div id="notices">
@@ -44,8 +44,12 @@
               <td>Dataset details:</td>
               <td><?=$statisticsDetails?></td>
             </tr>
+            <tr>
+              <td>Average:</td>
+              <td><span class="highlight">one</span> <?=$word?> <span class="highlight">every ~<?=$avg.' '.$avgPeriod?></span></td>
+            </tr>
           </table>
-          <p class="notice"><?=($messageNumber>1)?$footerNotice:''?></p>
+          <p class="notice"><?=isset($messageNumber)?$footerNotice:''?></p>
         </div>
       </section>
     </div>
