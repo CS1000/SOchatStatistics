@@ -45,6 +45,8 @@
     $messageNumber=$allTimeMsg[1]+0;
     if ($messageNumber<1) {
         $range='';
+        $avg='never';
+        $avgPeriod=' ever';
         $rangeDetailed="The begining of time <small><small>clock on chat.stackoverflow server</small></small> &mdash; Today, Current Time";
         $statisticsDetails="Zero Results";
         goto theEndOfTheRoad;
@@ -54,6 +56,7 @@
     $start=preg_grep('~<div class="timestamp">~i', $data);
     $end=trim(strip_tags(array_shift($start)));
     count($start)<1 ? $start=$end : $start=trim(strip_tags(array_pop($start)));
+    
     $start=new DateTime(str_replace("'", '20', $start));
     $end=new DateTime(str_replace("'", '20', $end));
     $interval=$start->diff($end);
@@ -82,21 +85,23 @@
         $shownMessages++;
     }
     arsort($count);
-    $avg=$interval->days/$shownMessages; //days
-    $avgPeriod='days';
-    if ($avg<1) {
-        $avg*=24;
-        $avgPeriod='hours';
+    $avg=($end->format("U")-$start->format("U"))/$shownMessages; //seconds
+    $avgPeriod=' seconds';
+    if ($avg>=120) {
+        $avg/=60;
+        $avgPeriod=' minutes';
+        if ($avg>=120) {
+            $avg/=60;
+            $avgPeriod=' hours';
+            if ($avg>=48) {
+                $avg/=24;
+                $avgPeriod=' days';
+            }
+        }
+    
     }
-    if ($avg<1) {
-        $avg*=60;
-        $avgPeriod='minutes';
-    }
-    if ($avg<1) {
-        $avg*=60;
-        $avgPeriod='seconds';
-    }
-    $avg=round($avg);
+    
+    $avg=abs(round($avg)); //heck
 
     $list=[];
     $other=0; //counts messages
@@ -117,7 +122,7 @@
             $tlist['label']="$name";
             $tlist["place"]="#$topUsers";
             $percent=round($num*100/$shownMessages, 1);
-            $tlist["percent"]=$percent;
+            $tlist["percent"]="$percent";
             $uniqNameColor=substr(hash('md4', $id),1 ,6); //color algo #1
             $tlist["color"]='#'.$uniqNameColor;
             //$tlist["indexLabelFontColor"]='#'.substr(preg_replace('/[^0-9a-f]/', '', $name.$id), 0 ,6); //color algo #2
@@ -132,7 +137,7 @@
             $otherUsers++; //add users
         }
     endforeach;
-    if ($other) $list[]=['y'=>$other, 'label'=>"Others", "percent"=>round($other*100/$shownMessages, 1)];
+    if ($other) $list[]=['y'=>$other, 'label'=>"Others", "percent"=>(string)round($other*100/$shownMessages, 1)];
 
     $allTimePercent=round($shownMessages*100/$messageNumber, 1);
     if ($allTimePercent==100) $statisticsDetails='<b>All time data</b>';
@@ -150,7 +155,7 @@
         $footerNotice.='<b>are not shown in the list</b>, and counted towards "Others" group for readability.';
     }
 
-    $list=json_encode($list); 
+    $list=json_encode($list)."\n"; 
 
 theEndOfTheRoad:
  

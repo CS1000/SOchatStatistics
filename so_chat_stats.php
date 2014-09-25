@@ -20,7 +20,8 @@
                       indexLabel: "{label} {percent}%", 
                       toolTipContent: "{place} <b>{label}</b><br> said it {y} times",
                       type: "doughnut",
-                      dataPoints: <?=$list?>
+                      dataPoints: 
+                        <?=$list?>
                   }]
               });
               userchart.render();
@@ -46,7 +47,7 @@
             </tr>
             <tr>
               <td>Average:</td>
-              <td><span class="highlight">one</span> <?=$word?> <span class="highlight">every ~<?=$avg.' '.$avgPeriod?></span></td>
+              <td><span class="highlight">one</span> <?=$word?> <span class="highlight">every ~<?=$avg.$avgPeriod?></span></td>
             </tr>
           </table>
           <p class="notice"><?=isset($messageNumber)?$footerNotice:''?></p>
